@@ -23,3 +23,18 @@ node_modules/
 
 # Notas y guías privadas del profesor (no publicar)
 sesiones/
+
+# Ignorar entorno virtual del Proyecto I
+proyectos/proyecto_i/.venv/
+
+# Archivos generados por el Proyecto I
+/proyectos/proyecto_i/resultados/
+/proyectos/proyecto_i/resultados_prueba/
+/proyectos/proyecto_i/datos/divisas_prueba.csv
+/proyectos/proyecto_i/datos/divisas_backup.csv
+
+# Archivos temporales de Python
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
