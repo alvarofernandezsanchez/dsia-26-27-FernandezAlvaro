@@ -38,3 +38,10 @@ __pycache__/
 .pytest_cache/
 .venv/
 *.pyc
+
+# Ignorar entorno virtual del Proyecto II
+# Proyecto II: archivos privados y generados
+/proyectos/proyecto_ii/.env
+/proyectos/proyecto_ii/.venv/
+/proyectos/proyecto_ii/resultados/
+/proyectos/proyecto_ii/resultados_prueba/
