@@ -388,6 +388,8 @@ Es importante distinguir los dos componentes de inteligencia artificial del proy
 
 La inteligencia artificial generativa no sustituye al modelo predictivo ni calcula las métricas originales.
 
+Se ha elegido NVIDIA Nemotron como proveedor alternativo a Hugging Face, conforme a las opciones permitidas en el enunciado. Su tarea es la generación de informes explicativos en lenguaje natural a partir de las métricas del pipeline.
+
 ### Validación de la integración
 
 La integración con NVIDIA se ha comprobado mediante una ejecución real de la API.
@@ -497,11 +499,15 @@ Además, la disponibilidad de una API pública facilita la automatización de la
 
 ### Licencia y condiciones de uso
 
-Los datos se han obtenido mediante la API pública Frankfurter.
+Los datos históricos de tipos de cambio se obtienen mediante la API pública Frankfurter (https://frankfurter.dev/).
 
-La licencia específica y las condiciones de reutilización del conjunto de datos deben verificarse en la documentación oficial del proveedor.
+Frankfurter distribuye su software bajo licencia MIT. Sin embargo, esta licencia no se aplica automáticamente a los datos, que proceden de bancos centrales y otras instituciones.
 
-No se atribuye una licencia concreta sin haber confirmado sus condiciones.
+Las condiciones de reutilización dependen de los proveedores originales de los datos.
+
+Documentación: https://frankfurter.dev/license/
+
+Los datos se utilizan en este proyecto con fines académicos, para realizar análisis estadísticos y entrenar modelos predictivos.
 
 ## 13. Limitaciones
 
