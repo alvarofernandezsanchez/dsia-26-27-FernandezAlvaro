@@ -56,10 +56,28 @@ class AIClient:
     def _real_report(self, metrics: pd.DataFrame) -> str:
         """Solicita a OpenAI un informe basado en las métricas."""
 
-        self.logger.info("Generando informe mediante OpenAI")
+        self.logger.info(
+            "Generando informe mediante %s",
+            self.config.ai_provider,
+        )
 
-        if not self.config.openai_api_key:
-            raise ValueError("Falta OPENAI_API_KEY")
+        if self.config.ai_provider == "nvidia":
+            api_key = self.config.nvidia_api_key
+            model = self.config.nvidia_model
+            base_url = "https://integrate.api.nvidia.com/v1"
+
+        elif self.config.ai_provider == "openai":
+            api_key = self.config.openai_api_key
+            model = self.config.openai_model
+            base_url = None
+
+        else:
+            raise ValueError("Proveedor de IA no válido")
+
+        if not api_key:
+            raise ValueError(
+                f"Falta la API key del proveedor {self.config.ai_provider}"
+            )
 
         # Convertimos las métricas a un formato que pueda leer la API
         data = metrics.to_dict(orient="records")
@@ -67,30 +85,44 @@ class AIClient:
 
         # Creamos el cliente con la clave configurada
         client = OpenAI(
-            api_key=self.config.openai_api_key,
+            api_key=api_key,
+            base_url=base_url,
             timeout=30.0,
-            max_retries=2
+            max_retries=2,
         )
 
         # Enviamos las métricas al modelo de IA
-        response = client.responses.create(
-            model=self.config.openai_model,
-            instructions=(
-                "Eres un analista de datos financieros. "
-                "Redacta en español un informe claro y breve "
-                "sobre las cotizaciones de divisas proporcionadas. "
-                "Utiliza únicamente las cifras recibidas. "
-                "No inventes datos, causas económicas ni predicciones. "
-                "No proporciones recomendaciones de inversión."
-            ),
-            input=(
-                "Analiza estas métricas de tipos de cambio "
-                "y genera un informe en formato Markdown:\n"
-                f"{metrics_json}"
-            )
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Eres un analista de datos financieros. "
+                        "Redacta en español un informe claro y breve "
+                        "sobre las cotizaciones de divisas proporcionadas. "
+                        "Utiliza únicamente las cifras recibidas. "
+                        "No inventes datos, causas económicas ni predicciones. "
+                        "No proporciones recomendaciones de inversión."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        "Analiza estas métricas de tipos de cambio "
+                        "y genera un informe en formato Markdown:\n"
+                        f"{metrics_json}"
+                    ),
+                },
+            ],
         )
 
-        if not response.output_text:
+        if not response.choices:
+            raise RuntimeError("La API no devolvió ninguna respuesta")
+
+        report = response.choices[0].message.content
+
+        if not report:
             raise RuntimeError("La API no devolvió un informe")
 
-        return response.output_text
+        return report

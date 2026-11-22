@@ -57,7 +57,7 @@ def test_real_without_api_key(metrics):
     config = AppConfig(ai_mode="real", openai_api_key="")
     client = AIClient(config)
 
-    with pytest.raises(ValueError, match="Falta OPENAI_API_KEY"):
+    with pytest.raises(ValueError, match="Falta la API key del proveedor openai"):
         client.generate_report(metrics)
 
 
@@ -66,9 +66,10 @@ def test_real_without_api_key(metrics):
 def test_real_report(mock_openai, metrics):
     # Simulamos la respuesta que devolvería OpenAI
     mock_response = MagicMock()
-    mock_response.output_text = "Informe financiero generado"
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = "Informe financiero generado"
 
-    mock_openai.return_value.responses.create.return_value = mock_response
+    mock_openai.return_value.chat.completions.create.return_value = mock_response
 
     config = AppConfig(
         ai_mode="real",
@@ -79,4 +80,53 @@ def test_real_report(mock_openai, metrics):
     report = client.generate_report(metrics)
 
     assert report == "Informe financiero generado"
-    mock_openai.return_value.responses.create.assert_called_once()
+    mock_openai.return_value.chat.completions.create.assert_called_once()
+
+@patch("divisas_app.ai_client.OpenAI")
+def test_nvidia_report(mock_openai, metrics):
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = "Informe generado por NVIDIA"
+
+    mock_openai.return_value.chat.completions.create.return_value = mock_response
+
+    config = AppConfig(
+        ai_mode="real",
+        ai_provider="nvidia",
+        nvidia_api_key="clave_ficticia",
+        nvidia_model="nvidia/nemotron-3.5-super-vl-120b-a12b",
+    )
+
+    client = AIClient(config)
+    report = client.generate_report(metrics)
+
+    assert report == "Informe generado por NVIDIA"
+
+    mock_openai.assert_called_once_with(
+        api_key="clave_ficticia",
+        base_url="https://integrate.api.nvidia.com/v1",
+        timeout=30.0,
+        max_retries=2,
+    )
+
+    mock_openai.return_value.chat.completions.create.assert_called_once()
+
+    kwargs = mock_openai.return_value.chat.completions.create.call_args.kwargs
+
+    assert kwargs["model"] == "nvidia/nemotron-3.5-super-vl-120b-a12b"
+
+def test_nvidia_without_api_key(metrics):
+        config = AppConfig(
+            ai_mode="real",
+            ai_provider="nvidia",
+            nvidia_api_key="",
+            nvidia_model="nvidia/nemotron-3.5-super-vl-120b-a12b",
+        )
+
+        client = AIClient(config)
+
+        with pytest.raises(
+            ValueError,
+            match="Falta la API key del proveedor nvidia",
+        ):
+            client.generate_report(metrics)

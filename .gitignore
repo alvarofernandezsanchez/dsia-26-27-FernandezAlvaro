@@ -45,3 +45,6 @@ __pycache__/
 /proyectos/proyecto_ii/.venv/
 /proyectos/proyecto_ii/resultados/
 /proyectos/proyecto_ii/resultados_prueba/
+
+#Ignorar tests nvidia resultados
+resultados_nvidia/
