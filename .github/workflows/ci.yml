@@ -38,6 +38,12 @@ jobs:
 
   proyecto-i:
     name: Proyecto I - Tests y cobertura
+    if: |
+      github.ref == 'refs/heads/feature/proyecto-i' ||
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'pull_request' &&
+       (github.base_ref == 'main' ||
+        github.head_ref == 'feature/proyecto-i'))
     runs-on: ubuntu-latest
 
     defaults:
@@ -62,12 +68,19 @@ jobs:
       - name: Run Project I tests with coverage
         run: |
           uv run pytest -q \
+            --cov=ventas_app \
             --cov=divisas_app \
             --cov-report=term-missing \
             --cov-fail-under=60
 
   proyecto-ii:
     name: Proyecto II - Tests y calidad
+    if: |
+      github.ref == 'refs/heads/feature/proyecto-ii' ||
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'pull_request' &&
+       (github.base_ref == 'main' ||
+        github.head_ref == 'feature/proyecto-ii'))
     runs-on: ubuntu-latest
 
     defaults:
