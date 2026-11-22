@@ -35,4 +35,6 @@ Se han desarrollado pruebas automatizadas para comprobar el funcionamiento del c
 
 También se ha incorporado un test de integración que comprueba el funcionamiento del pipeline completo.
 
-Los informes generados no constituyen asesoramiento financiero. El modelo de IA puede producir interpretaciones incorrectas, por lo
+Los informes generados no constituyen asesoramiento financiero. El modelo de IA puede producir interpretaciones incorrectas, por lo que sus resultados deben revisarse antes de utilizarlos.
+
+El modo `mock` se ha validado mediante pruebas automatizadas y ejecuciones completas del pipeline. La integración con OpenAI está implementada y se ha probado mediante respuestas simuladas, pero todavía no se ha validado mediante una petición real a la API.

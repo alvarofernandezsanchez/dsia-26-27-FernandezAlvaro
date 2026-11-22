@@ -1,37 +1,3 @@
-# Proyecto II — Automatización e integración de servicios (20 %)
-
-**Temas:** 2, 3 y 4  
-**Trabajo continuo:** octubre 2026  
-**Hito de presentación del Trabajo Final (enunciado E2E):** 20 de octubre de 2026
-
-## Objetivo
-
-Automatizar un proceso de datos e integrar al menos un **servicio de IA vía API**, con pruebas y buenas prácticas de entornos.
-
-## Requisitos mínimos
-
-1. Pipeline reproducible (CLI o job) con logs.
-2. Tests pytest (unitarios + al menos un test de integración o marcado).
-3. Cliente de IA con modo `mock` y un proveedor real documentado (si no hay clave, mock + diseño listo).
-4. `.env.example` y `requirements.txt`.
-5. Sección `AI_USAGE.md` citando herramientas de IA usadas en el desarrollo.
-
-## Entrega
-
-Repo GitHub con historial de commits a lo largo de octubre.
-
-## Rúbrica orientativa
-
-| Criterio | Peso |
-| --- | --- |
-| Pipeline y automatización | 25 % |
-| Integración API / IA | 25 % |
-| Tests y calidad | 20 % |
-| Robustez (errores, logs, config) | 15 % |
-| Documentación y citación IA | 15 % |
-
-
-
 # Proyecto II — Automatización e integración de servicios
 
 ## 1. Descripción
@@ -161,7 +127,7 @@ Para ejecutar todos los tests:
 uv run pytest -v
 ```
 
-El proyecto incluye 21 pruebas automatizadas que cubren la validación, el preprocesamiento, las métricas, la actualización de datos, el cliente de IA y el funcionamiento integrado del pipeline.
+El proyecto incluye 25 pruebas automatizadas que cubren la validación, el preprocesamiento, las métricas, la actualización de datos, el cliente de IA y el funcionamiento integrado del pipeline.
 
 Las llamadas externas se simulan en los tests correspondientes para evitar depender de servicios externos durante las pruebas.
 
