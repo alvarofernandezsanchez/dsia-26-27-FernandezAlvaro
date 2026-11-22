@@ -134,7 +134,7 @@ Se entrena un modelo `RandomForestRegressor` independiente para cada par de divi
 
 La variable objetivo (`target`) es el tipo de cambio del siguiente registro.
 
-Los datos se dividen cronológicamente en un 80 % para entrenamiento y un 20 % para evaluación. De esta manera se evita entrenar con observaciones posteriores a las utilizadas para evaluar el modelo.
+Los datos se dividen cronológicamente en un 80 % para entrenamiento y un 20 % para evaluación.
 
 Los modelos entrenados se guardan en:
 
@@ -144,6 +144,8 @@ También se generan archivos con las métricas y las predicciones de evaluación
 
 - `modelos/metricas_modelo.csv`
 - `modelos/predicciones_test.csv`
+
+El archivo `divisas_model.joblib` no se incluye en GitHub debido a su tamaño, aproximadamente 128 MB. Para reproducir las predicciones, es necesario ejecutar el entrenamiento.
 
 ### 6.2. Ejecución con datos locales
 
@@ -159,7 +161,7 @@ El pipeline carga el modelo entrenado y genera un archivo adicional:
 
 Este archivo contiene las predicciones del siguiente tipo de cambio para los pares de divisas disponibles.
 
-Si el archivo del modelo no existe, el pipeline registra una advertencia y continúa con el análisis estadístico y la generación del informe. Para obtener predicciones es necesario ejecutar previamente el entrenamiento.
+Si el archivo del modelo no existe, el pipeline registra una advertencia y continúa con el análisis estadístico y la generación del informe.
 
 ### 6.3. Actualización mediante Frankfurter
 
@@ -171,7 +173,7 @@ uv run python -m divisas_app.cli --update --input datos/divisas.csv --output res
 
 Esta opción utiliza la API de Frankfurter para obtener datos de divisas.
 
-Si se incorporan nuevas observaciones al conjunto de datos, es recomendable volver a entrenar los modelos para actualizar sus patrones históricos.
+Si se incorporan nuevas observaciones al conjunto de datos, es recomendable volver a entrenar los modelos.
 
 ### 6.4. Ejecución con NVIDIA Nemotron
 
@@ -410,9 +412,11 @@ Para obtener un resultado resumido:
 uv run pytest -q
 ```
 
-Durante la última comprobación se obtuvieron:
+Durante la última comprobación se obtuvo:
 
-**31 tests superados y 1 warning.**
+```text
+31 passed in 8.57s
+```
 
 Las pruebas cubren:
 
@@ -439,6 +443,8 @@ Para ejecutar Ruff:
 uv run ruff check .
 ```
 
+La comprobación de calidad del código se completó correctamente.
+
 ## 11. Arquitectura
 
 El pipeline sigue el siguiente flujo:
@@ -460,9 +466,17 @@ La separación entre procesamiento de datos, predicción con Machine Learning y 
 
 ## 12. Datos utilizados
 
-El proyecto utiliza un conjunto de datos históricos de tipos de cambio almacenado en:
+El proyecto utiliza datos históricos de tipos de cambio obtenidos mediante la API pública **Frankfurter**.
+
+**Fuente:** https://frankfurter.dev/
+
+**Endpoint utilizado:** `https://api.frankfurter.dev/v2/rates.csv`
+
+El conjunto de datos contiene información histórica desde 2023 y se almacena localmente en:
 
 `datos/divisas.csv`
+
+Durante el desarrollo del proyecto, el dataset se actualizó mediante la API de Frankfurter, pasando de 14.248 a 17.966 registros.
 
 Las columnas utilizadas son:
 
@@ -473,11 +487,21 @@ Las columnas utilizadas son:
 | `quote` | Moneda de cotización. |
 | `rate` | Tipo de cambio registrado. |
 
-El conjunto utilizado contiene 17.966 registros y 13 pares de divisas.
+El conjunto utilizado contiene **17.966 registros correspondientes a 13 pares de divisas**.
 
-La API de Frankfurter permite incorporar datos adicionales mediante la opción de actualización del pipeline.
+### Motivación de la elección del dataset
 
-**Pendiente de verificar antes de la entrega:** procedencia exacta, licencia y condiciones de reutilización del CSV histórico. No se atribuye una fuente ni una licencia que no hayan sido comprobadas.
+Se ha seleccionado este conjunto de datos porque permite trabajar con información financiera histórica organizada temporalmente, aplicar procesos de validación y limpieza, calcular métricas estadísticas y desarrollar modelos de predicción.
+
+Además, la disponibilidad de una API pública facilita la automatización de la actualización de los datos.
+
+### Licencia y condiciones de uso
+
+Los datos se han obtenido mediante la API pública Frankfurter.
+
+La licencia específica y las condiciones de reutilización del conjunto de datos deben verificarse en la documentación oficial del proveedor.
+
+No se atribuye una licencia concreta sin haber confirmado sus condiciones.
 
 ## 13. Limitaciones
 
