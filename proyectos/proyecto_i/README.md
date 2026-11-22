@@ -1,157 +1,246 @@
-# Proyecto I — Pipeline de calidad de datos de divisas
+# Proyecto I — Pipeline de calidad de datos de ventas y divisas
 
 ## 1. Descripción
 
-Aplicación desarrollada en Python para descargar, validar, limpiar y analizar tipos de cambio de distintas divisas respecto al euro (EUR).
+Proyecto desarrollado en Python para cargar, validar, limpiar y analizar datos mediante dos aplicaciones independientes:
 
-El proyecto utiliza datos históricos de la API pública **Frankfurter** y permite actualizar automáticamente el dataset, detectar registros incorrectos o duplicados y generar informes estadísticos.
+- **Parte A — Ventas:** análisis de un dataset comercial, con validación de registros y cálculo de importes por región y producto.
+- **Parte B — Divisas:** análisis de cotizaciones históricas, detección de registros incorrectos y duplicados, cálculo de estadísticas y actualización opcional mediante la API Frankfurter.
 
-Se han aplicado conceptos de programación orientada a objetos, modularidad, validación de datos, gestión de excepciones y pruebas automáticas.
+Se aplican conceptos de programación orientada a objetos (OOP), modularidad, estructuras de datos, gestión de excepciones, validación, documentación y pruebas automatizadas.
 
-## 2. Tecnologías utilizadas
+## 2. Tecnologías
 
-- Python
-- pandas: procesamiento y análisis de datos.
-- Pydantic: validación de registros.
-- requests: conexión con la API.
-- pytest: pruebas automáticas.
-- uv: gestión de dependencias y entorno de ejecución.
+- Python 3.12 o superior.
+- pandas: procesamiento de datos de divisas.
+- Pydantic: validación de cotizaciones.
+- requests: conexión con la API Frankfurter.
+- pytest: pruebas unitarias, parametrizadas y de integración.
+- uv: gestión de dependencias y ejecución.
+- GitHub Actions: integración continua.
 
-## 3. Fuente de datos
-
-Los datos proceden de la API pública Frankfurter:
-
-https://frankfurter.dev/
-
-Cada registro contiene cuatro campos:
-
-| Campo | Descripción |
-|---|---|
-| `date` | Fecha de la cotización |
-| `base` | Moneda de origen |
-| `quote` | Moneda de destino |
-| `rate` | Tipo de cambio |
-
-El dataset inicial contiene cotizaciones históricas desde 2023 y puede actualizarse mediante la API.
-
-## 4. Estructura del proyecto
+## 3. Estructura del proyecto
 
 ```text
 proyecto_i/
 ├── datos/
+│   ├── ventas.csv
+│   ├── ventas_prueba.csv
 │   └── divisas.csv
-├── resultados/
 ├── src/
+│   ├── ventas_app/
+│   │   ├── __init__.py
+│   │   ├── loader.py
+│   │   ├── validator.py
+│   │   ├── metrics.py
+│   │   └── cli.py
 │   └── divisas_app/
 │       ├── __init__.py
 │       ├── contract.py
+│       ├── loader.py
+│       ├── validator.py
+│       ├── metrics.py
 │       ├── preprocess.py
 │       ├── inference.py
 │       ├── main.py
 │       └── cli.py
 ├── tests/
-│   ├── test_contract.py
-│   ├── test_preprocess.py
-│   ├── test_inference.py
-│   └── test_api.py
 ├── pyproject.toml
 ├── uv.lock
 └── README.md
 ```
 
-## 5. Instalación
+Los módulos `preprocess.py` e `inference.py` se conservan por compatibilidad con el código y las pruebas anteriores. El procesamiento principal de divisas utiliza los nuevos módulos `loader.py`, `validator.py` y `metrics.py`.
 
-Es necesario tener instalados Python y `uv`.
+## 4. Instalación
 
-Desde la carpeta `proyecto_i`, ejecutar:
+Desde la carpeta `proyectos/proyecto_i`:
 
-```bash
+```powershell
 uv sync
 ```
 
-Este comando prepara el entorno e instala las dependencias definidas en el proyecto.
+Este comando crea o actualiza el entorno virtual e instala las dependencias del proyecto.
 
-## 6. Ejecución
+## 5. Parte A — Ventas
 
-### Procesar el dataset existente
+### Datos de entrada
 
-```bash
-uv run python -m divisas_app.cli --input datos/divisas.csv --output resultados
+El archivo `datos/ventas.csv` contiene las siguientes columnas:
+
+| Campo | Descripción |
+|---|---|
+| `fecha` | Fecha de la venta |
+| `region` | Región comercial |
+| `producto` | Producto vendido |
+| `unidades` | Número de unidades |
+| `precio_unitario` | Precio de cada unidad |
+| `cliente_id` | Identificador del cliente |
+
+### Validación
+
+Se comprueba que existan las columnas obligatorias, que los campos no estén vacíos, que las fechas tengan un formato válido, que las unidades sean enteros positivos y que los precios sean números no negativos.
+
+Los errores se comunican mediante excepciones propias, indicando la fila y el campo afectado cuando corresponde.
+
+### Métricas
+
+Se calculan:
+
+- Importe total de ventas.
+- Importe vendido por región.
+- Importe vendido por producto.
+- Unidades totales vendidas.
+
+El importe de cada venta se obtiene mediante:
+
+**Importe = unidades × precio unitario**
+
+Para los cálculos monetarios se utiliza `Decimal`.
+
+### Ejecución
+
+Para procesar el dataset original:
+
+```powershell
+uv run python -m ventas_app.cli --input datos/ventas.csv
 ```
 
-### Actualizar los datos desde Frankfurter y procesarlos
+El archivo original contiene al menos un registro con el campo `unidades` vacío. La aplicación lo detecta y muestra un error de validación.
 
-```bash
-uv run python -m divisas_app.cli --update --input datos/divisas.csv --output resultados
+Para comprobar el cálculo de métricas con datos válidos:
+
+```powershell
+uv run python -m ventas_app.cli --input datos/ventas_prueba.csv
 ```
 
-También es posible utilizar los valores predeterminados:
+El archivo de prueba contiene cuatro ventas válidas, con un importe total esperado de **738,50 €**.
 
-```bash
-uv run python -m divisas_app.cli --update
-```
+## 6. Parte B — Divisas
 
-## 7. Validación y limpieza
+### Fuente de datos
+
+Se utilizan cotizaciones históricas de divisas. La actualización opcional se realiza mediante la API pública Frankfurter:
+
+https://frankfurter.dev/
+
+Cada registro contiene:
+
+| Campo | Descripción |
+|---|---|
+| `date` | Fecha de cotización |
+| `base` | Moneda de origen |
+| `quote` | Moneda de destino |
+| `rate` | Tipo de cambio |
+
+### Validación y limpieza
 
 El programa comprueba:
 
-- Que las fechas tengan un formato válido.
-- Que los códigos de divisas contengan tres letras mayúsculas.
-- Que las monedas de origen y destino sean diferentes.
-- Que los tipos de cambio sean positivos.
-- Que no existan cotizaciones duplicadas para una misma fecha y par de monedas.
+- Formato válido de las fechas.
+- Códigos de moneda de tres letras mayúsculas.
+- Monedas de origen y destino diferentes.
+- Tipos de cambio positivos.
+- Cotizaciones duplicadas para la misma fecha y par de monedas.
 
-Los registros incorrectos y duplicados se separan de los datos limpios.
+Los registros inválidos y duplicados se separan de los datos limpios.
 
-## 8. Métricas calculadas
+### Métricas
 
-Para cada par de divisas se calculan:
+Para cada par de monedas se calculan:
 
 - Tipo de cambio medio.
 - Tipo de cambio mínimo.
 - Tipo de cambio máximo.
-- Número de registros.
+- Número de cotizaciones.
 - Variación porcentual entre la primera y última cotización.
 
-La variación porcentual se calcula mediante:
+La variación se calcula mediante:
 
-**Variación (%) = ((valor final - valor inicial) / valor inicial) × 100**
+**Variación (%) = ((valor final − valor inicial) / valor inicial) × 100**
 
-## 9. Archivos generados
+### Ejecución
 
-La aplicación crea cuatro archivos CSV en la carpeta de resultados:
+Procesar el dataset existente:
+
+```powershell
+uv run python -m divisas_app.cli --input datos/divisas.csv --output resultados
+```
+
+Actualizar las cotizaciones desde Frankfurter y procesarlas:
+
+```powershell
+uv run python -m divisas_app.cli --update --input datos/divisas.csv --output resultados
+```
+
+La actualización requiere conexión a Internet y puede modificar el CSV de entrada.
+
+### Archivos generados
+
+La aplicación crea cuatro archivos en la carpeta de salida:
 
 | Archivo | Contenido |
 |---|---|
 | `divisas_limpias.csv` | Registros válidos sin duplicados |
 | `registros_invalidos.csv` | Registros que incumplen las reglas |
 | `duplicados.csv` | Cotizaciones repetidas |
-| `metricas_divisas.csv` | Informe estadístico por divisa |
+| `metricas_divisas.csv` | Estadísticas por par de monedas |
 
-## 10. Pruebas automáticas
+## 7. Organización del código
 
-El proyecto utiliza pytest para verificar la validación de datos, la detección de duplicados, los cálculos estadísticos y la actualización mediante la API.
+Ambas aplicaciones utilizan una estructura modular:
 
-Para ejecutar los tests:
+- `loader.py`: carga de archivos y comprobación de columnas.
+- `validator.py`: validación de registros y reglas de calidad.
+- `metrics.py`: cálculo de indicadores y estadísticas.
+- `cli.py`: interfaz para ejecutar el programa desde la terminal.
 
-```bash
+En divisas, `contract.py` contiene el modelo Pydantic y las excepciones, mientras que `main.py` coordina el procesamiento y la exportación.
+
+Esta separación permite probar y mantener cada componente de forma independiente.
+
+## 8. Pruebas automatizadas
+
+El proyecto incluye pruebas de:
+
+- Carga y validación de datos.
+- Registros incorrectos y casos límite.
+- Detección de duplicados.
+- Cálculo de métricas.
+- Parametrización mediante `pytest.mark.parametrize`.
+- Integración de las aplicaciones completas mediante sus CLI.
+- Comportamiento de la actualización de divisas mediante pruebas con respuestas simuladas.
+
+Para ejecutar todas las pruebas:
+
+```powershell
 uv run pytest -v
 ```
 
-Se han implementado 15 pruebas automáticas, incluyendo simulaciones de respuestas de Frankfurter que no requieren conexión real a Internet.
+**Resultado verificado localmente: 41 tests superados.**
 
-## 11. Organización del código
+## 9. Integración continua
 
-- `contract.py`: modelos de datos, reglas de validación y excepciones personalizadas.
-- `preprocess.py`: carga, validación, limpieza y actualización del dataset.
-- `inference.py`: cálculo de estadísticas y variaciones.
-- `main.py`: coordinación del pipeline y exportación de resultados.
-- `cli.py`: interfaz de línea de comandos.
-- `tests/`: pruebas automáticas de los componentes.
+El repositorio dispone de un workflow en `.github/workflows/ci.yml` con un trabajo específico para el Proyecto I.
 
-## 12. Posibles mejoras futuras
+Está configurado para ejecutarse en GitHub Actions al subir cambios a `main` o `feature/proyecto-i`, así como en las solicitudes de incorporación de cambios (*pull requests*).
 
-- Incorporar nuevas monedas.
-- Permitir seleccionar intervalos de fechas desde la CLI.
+El trabajo instala Python, prepara el entorno con `uv` y ejecuta:
+
+```powershell
+uv run pytest -v
+```
+
+La ejecución correcta del workflow debe comprobarse en la pestaña **Actions** del repositorio.
+
+## 10. Posibles mejoras
+
+- Permitir descartar registros inválidos de ventas y continuar con los válidos.
+- Exportar las métricas de ventas a CSV.
+- Incorporar filtros de fechas y productos.
 - Generar gráficos de evolución de cotizaciones.
-- Exportar informes en otros formatos.
+- Ampliar los informes y formatos de exportación.
+
+## 11. Uso de herramientas de IA
+
+Se ha utilizado ChatGPT como herramienta de apoyo para revisar la organización del código, preparar casos de prueba y mejorar la documentación. Las modificaciones se han comprobado mediante ejecuciones locales y pruebas automatizadas.

@@ -1,7 +1,7 @@
 [project]
-name = "divisas-app"
+name = "proyecto-i-calidad-datos"
 version = "0.1.0"
-description = "Add your description here"
+description = "Pipeline de calidad de datos de ventas y divisas"
 readme = "README.md"
 authors = [
     { name = "Alvaro Fernandez Sanchez", email = "alvaroarquero1@gmail.com" }
@@ -19,6 +19,9 @@ divisas-app = "divisas_app:main"
 [build-system]
 requires = ["uv_build>=0.12.9,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = ["divisas_app", "ventas_app"]
 
 [dependency-groups]
 dev = [

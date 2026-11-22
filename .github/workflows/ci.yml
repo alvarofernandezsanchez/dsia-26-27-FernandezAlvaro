@@ -2,24 +2,57 @@ name: dsia-ci
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - feature/proyecto-i
   pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install dependencies
+
+      - name: Install course dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
       - name: Unit tests (tema 2)
         working-directory: 2_pruebas_y_despliegue/ejemplos
         run: pytest -q
+
       - name: API template tests (tema 5)
         working-directory: 5_desarrollo_end_to_end/plantilla_proyecto
         run: pytest -q
+
+  proyecto-i:
+    name: Proyecto I - Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: proyectos/proyecto_i
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install project dependencies
+        run: uv sync --frozen
+
+      - name: Run Proyecto I tests
+        run: uv run pytest -v
