@@ -1,3 +1,4 @@
+
 name: dsia-ci
 
 on:
@@ -5,6 +6,7 @@ on:
     branches:
       - main
       - feature/proyecto-i
+      - feature/proyecto-ii
   pull_request:
   workflow_dispatch:
 
@@ -35,7 +37,7 @@ jobs:
         run: pytest -q
 
   proyecto-i:
-    name: Proyecto I - Tests
+    name: Proyecto I - Tests y cobertura
     runs-on: ubuntu-latest
 
     defaults:
@@ -46,14 +48,49 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
-      - name: Set up Python
-        run: uv python install
-
-      - name: Install project dependencies
+      - name: Install dependencies
         run: uv sync --frozen
 
-      - name: Run Proyecto I tests
-        run: uv run pytest -v
+      - name: Run Project I tests with coverage
+        run: |
+          uv run pytest -q \
+            --cov=divisas_app \
+            --cov-report=term-missing \
+            --cov-fail-under=60
+
+  proyecto-ii:
+    name: Proyecto II - Tests y calidad
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: proyectos/proyecto_ii
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Project II tests
+        run: uv run pytest -q
+
+      - name: Check code quality
+        run: uv run ruff check .
