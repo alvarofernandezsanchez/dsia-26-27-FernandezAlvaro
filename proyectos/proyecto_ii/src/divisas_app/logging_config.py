@@ -1,5 +1,5 @@
-
 import logging
+import os
 from pathlib import Path
 
 
@@ -13,7 +13,8 @@ def setup_logging(output_dir: str = "resultados") -> None:
 
     # Creamos el logger principal de nuestra aplicación
     logger = logging.getLogger("divisas_app")
-    logger.setLevel(logging.INFO)
+    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    logger.setLevel(getattr(logging, log_level, logging.INFO))
 
     # Evitamos añadir los mismos handlers varias veces
     for handler in logger.handlers[:]:

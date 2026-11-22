@@ -1,8 +1,8 @@
 
 import os
 from dataclasses import dataclass
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 
 # Cargamos las variables del archivo .env
 load_dotenv()

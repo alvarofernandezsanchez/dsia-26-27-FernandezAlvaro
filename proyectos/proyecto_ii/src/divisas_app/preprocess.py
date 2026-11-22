@@ -1,11 +1,12 @@
 
+from io import StringIO
+
 import pandas as pd
+import requests
 from pydantic import ValidationError as PydanticValidationError
 
-from .contract import ExchangeRate, DataLoadError
+from .contract import DataLoadError, ExchangeRate
 
-import requests
-from io import StringIO
 
 #cargar, validar y limpiar el dataset
 class ExchangeRatePreprocessor:
@@ -28,6 +29,10 @@ class ExchangeRatePreprocessor:
                 "El CSV no contiene todas las columnas necesarias"
             )
 
+        if df.empty:
+            raise DataLoadError(
+                "El archivo CSV está vacío: no contiene registros"
+            )
         return df
 
     def validate_data(self, df: pd.DataFrame):
@@ -76,7 +81,14 @@ class ExchangeRatePreprocessor:
         df_actual = self.load_data()
 
         # Buscamos la última fecha disponible en nuestro CSV
-        ultima_fecha = pd.to_datetime(df_actual["date"]).max()
+        try:
+            ultima_fecha = pd.to_datetime(
+                df_actual["date"], errors="raise"
+            ).max()
+        except (ValueError, TypeError) as error:
+            raise DataLoadError(
+                f"El CSV contiene fechas incorrectas: {error}"
+            ) from error
 
         # Solicitamos cotizaciones desde el día siguiente
         fecha_inicio = (
@@ -109,6 +121,10 @@ class ExchangeRatePreprocessor:
             # Convertimos la respuesta de la API en un DataFrame
             nuevos = pd.read_csv(StringIO(response.text))
 
+            if nuevos.empty:
+                print("No hay cotizaciones nuevas disponibles.")
+                return df_actual
+
         except (requests.RequestException, pd.errors.ParserError) as error:
             raise DataLoadError(
                 f"Error al actualizar desde Frankfurter: {error}"
@@ -137,7 +153,7 @@ class ExchangeRatePreprocessor:
             )
 
         # Eliminamos posibles cotizaciones repetidas
-        actualizado, duplicados = self.remove_duplicates(validos)
+        actualizado, _ = self.remove_duplicates(validos)
 
         # Guardamos los datos actualizados
         actualizado.to_csv(self.filepath, index=False)

@@ -1,10 +1,10 @@
 
 import pandas as pd
-import requests
 import pytest
+import requests
 
-from divisas_app.preprocess import ExchangeRatePreprocessor
 from divisas_app.contract import DataLoadError
+from divisas_app.preprocess import ExchangeRatePreprocessor
 
 
 # Simula una respuesta correcta de Frankfurter
@@ -101,3 +101,47 @@ def test_api_without_new_data(tmp_path, monkeypatch):
     guardado = pd.read_csv(archivo)
     assert len(guardado) == 1
     assert guardado["rate"].iloc[0] == pytest.approx(1.10)
+
+
+def test_api_fecha_invalida(tmp_path):
+    from divisas_app.contract import DataLoadError
+    from divisas_app.preprocess import ExchangeRatePreprocessor
+
+    archivo = tmp_path / "divisas.csv"
+    archivo.write_text(
+        "date,base,quote,rate\n"
+        "fecha_incorrecta,EUR,USD,1.10\n",
+        encoding="utf-8",
+    )
+
+    processor = ExchangeRatePreprocessor(str(archivo))
+
+    with pytest.raises(DataLoadError, match="fechas incorrectas"):
+        processor.update_from_api()
+
+def test_api_sin_nuevas_cotizaciones(tmp_path, monkeypatch):
+    archivo = tmp_path / "divisas.csv"
+
+    contenido_original = (
+        "date,base,quote,rate\n"
+        "2026-01-01,EUR,USD,1.10\n"
+    )
+    archivo.write_text(contenido_original, encoding="utf-8")
+
+    class FakeResponse:
+        text = "date,base,quote,rate\n"
+
+        def raise_for_status(self):
+            pass
+
+    monkeypatch.setattr(
+        requests,
+        "get",
+        lambda *args, **kwargs: FakeResponse(),
+    )
+
+    processor = ExchangeRatePreprocessor(str(archivo))
+    resultado = processor.update_from_api()
+
+    assert len(resultado) == 1
+    assert archivo.read_text(encoding="utf-8") == contenido_original

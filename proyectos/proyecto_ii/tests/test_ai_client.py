@@ -1,7 +1,8 @@
 
+from unittest.mock import MagicMock, patch
+
 import pandas as pd
 import pytest
-from unittest.mock import MagicMock, patch
 
 from divisas_app.ai_client import AIClient
 from divisas_app.config import AppConfig

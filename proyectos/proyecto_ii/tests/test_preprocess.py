@@ -2,8 +2,8 @@
 import pandas as pd
 import pytest
 
-from divisas_app.preprocess import ExchangeRatePreprocessor
 from divisas_app.contract import DataLoadError
+from divisas_app.preprocess import ExchangeRatePreprocessor
 
 
 # Comprueba que podemos cargar un CSV correctamente
@@ -68,3 +68,16 @@ def test_remove_duplicates():
 
     assert len(limpios) == 1
     assert len(duplicados) == 1
+
+def test_csv_vacio(tmp_path):
+    archivo = tmp_path / "divisas.csv"
+
+    archivo.write_text(
+        "date,base,quote,rate\n",
+        encoding="utf-8",
+    )
+
+    processor = ExchangeRatePreprocessor(str(archivo))
+
+    with pytest.raises(DataLoadError, match="está vacío"):
+        processor.load_data()

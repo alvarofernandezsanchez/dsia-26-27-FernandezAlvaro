@@ -1,9 +1,9 @@
-
 import argparse
+import logging
 
+from .contract import DataLoadError, ValidationError
 from .main import run_pipeline
 from .preprocess import ExchangeRatePreprocessor
-from .contract import DataLoadError, ValidationError
 
 
 # Función principal que recibe los argumentos de la terminal
@@ -59,8 +59,8 @@ def main():
             ai_mode=args.ai_mode
         )
 
-    except (DataLoadError, ValidationError, OSError) as error:
-        # Mostramos un mensaje comprensible si algo falla
+    except (DataLoadError, ValidationError, OSError, ValueError, RuntimeError) as error:
+        logging.getLogger("divisas_app").error("%s", error)
         parser.exit(1, f"Error: {error}\n")
 
 
