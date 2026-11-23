@@ -1,0 +1,69 @@
+import argparse
+import logging
+
+from .contract import DataLoadError, ValidationError
+from .main import run_pipeline
+from .preprocess import ExchangeRatePreprocessor
+
+
+# Función principal que recibe los argumentos de la terminal
+def main():
+    """Permite actualizar y procesar el dataset de divisas."""
+
+    parser = argparse.ArgumentParser(
+        description="Pipeline de calidad de datos de divisas"
+    )
+
+    # Ruta del CSV que queremos procesar
+    parser.add_argument(
+        "--input",
+        default="datos/divisas.csv",
+        help="Ruta del CSV de entrada"
+    )
+
+    # Carpeta donde guardaremos los resultados
+    parser.add_argument(
+        "--output",
+        default="resultados",
+        help="Carpeta de salida"
+    )
+
+    # Opción para descargar nuevas cotizaciones desde Frankfurter
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Actualiza el dataset desde la API"
+    )
+    
+    parser.add_argument(
+        "--ai-mode",
+        choices=["mock", "real"],
+        default=None,
+        help="Modo de IA: mock o real"
+    )
+
+    args = parser.parse_args()
+
+    try:
+        if args.update:
+            # Actualizamos el CSV antes de procesarlo
+            print("Consultando Frankfurter...")
+            processor = ExchangeRatePreprocessor(args.input)
+            actualizado = processor.update_from_api()
+            print(f"Registros disponibles: {len(actualizado)}")
+
+        # Ejecutamos el pipeline de calidad de datos
+        run_pipeline(
+            input_path=args.input,
+            output_dir=args.output,
+            ai_mode=args.ai_mode
+        )
+
+    except (DataLoadError, ValidationError, OSError, ValueError, RuntimeError) as error:
+        logging.getLogger("divisas_app").error("%s", error)
+        parser.exit(1, f"Error: {error}\n")
+
+
+# Permite ejecutar el archivo como módulo de Python
+if __name__ == "__main__":
+    main()

@@ -1,4 +1,3 @@
-
 name: dsia-ci
 
 on:
@@ -7,6 +6,7 @@ on:
       - main
       - feature/proyecto-i
       - feature/proyecto-ii
+      - feature/proyecto-iii
   pull_request:
 
 jobs:
@@ -54,6 +54,32 @@ jobs:
         run: uv sync --frozen
 
       - name: Run Project II tests
+        run: uv run pytest -q
+
+      - name: Check code quality
+        run: uv run ruff check .
+
+  proyecto-iii:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: proyectos/proyecto_iii
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Project III tests
         run: uv run pytest -q
 
       - name: Check code quality

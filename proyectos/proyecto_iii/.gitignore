@@ -1,0 +1,2 @@
+modelos/*.joblib
+!modelos/divisas_model.joblib
