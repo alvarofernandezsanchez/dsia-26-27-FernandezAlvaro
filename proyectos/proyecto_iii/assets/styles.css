@@ -1,0 +1,142 @@
+
+/* Contenedor principal */
+.block-container {
+    max-width: 1500px;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Barra lateral */
+[data-testid="stSidebar"] {
+    background-color: #0E1726;
+    border-right: 1px solid #263247;
+}
+
+/* Títulos */
+h1, h2, h3 {
+    font-weight: 650;
+    letter-spacing: -0.5px;
+}
+
+/* Identidad visual */
+.brand-title {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: #E5EAF4;
+}
+
+.brand-accent {
+    color: #36D9B3;
+}
+
+.brand-subtitle {
+    color: #8191A9;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Tarjetas de indicadores */
+[data-testid="stMetric"] {
+    background-color: #131E30;
+    border: 1px solid #263247;
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 125px;
+}
+
+[data-testid="stMetricLabel"] {
+    color: #94A3B8;
+}
+
+[data-testid="stMetricValue"] {
+    font-weight: 650;
+}
+
+/* Botones */
+.stButton > button,
+.stDownloadButton > button {
+    background-color: #36D9B3;
+    color: #0B1120;
+    border: none;
+    border-radius: 8px;
+    font-weight: 650;
+    min-height: 42px;
+    transition: all 0.2s ease;
+}
+
+.stButton > button:hover,
+.stDownloadButton > button:hover {
+    background-color: #62E8CA;
+    color: #0B1120;
+    box-shadow: 0 0 15px rgba(54, 217, 179, 0.2);
+}
+
+/* Tarjetas personalizadas */
+.dashboard-card {
+    background-color: #131E30;
+    border: 1px solid #263247;
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 15px;
+}
+
+.card-label {
+    color: #94A3B8;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card-value {
+    color: #E5EAF4;
+    font-size: 30px;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.positive {
+    color: #36D9B3;
+}
+
+.negative {
+    color: #F87171;
+}
+
+.forecast {
+    color: #A78BFA;
+}
+
+/* Indicadores de estado */
+.status-online {
+    color: #36D9B3;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-offline {
+    color: #F87171;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Tablas */
+[data-testid="stDataFrame"] {
+    border: 1px solid #263247;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Separadores */
+hr {
+    border-color: #263247;
+}
+
+/* Pie de página */
+.dashboard-footer {
+    color: #64748B;
+    font-size: 12px;
+    text-align: center;
+    padding: 25px 0;
+}
